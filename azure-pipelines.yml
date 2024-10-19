@@ -10,8 +10,8 @@ stages:
 - stage: BuildAndPush
   jobs:
   - job: Build
-    pool:
-      vmImage: 'ubuntu-latest'
+    pool: 
+      name: 'homelab'
     steps:
     - task: UsePythonVersion@0
       inputs:
