@@ -1,0 +1,37 @@
+trigger:
+- master
+
+variables:
+  GCP_PROJECT_ID: 'refined-bolt-431903-u1'
+  GCP_ARTIFACT_REGISTRY: 'asia-east1-docker.pkg.dev'
+  IMAGE_NAME: 'pretest/pretest-api'
+
+stages:
+- stage: BuildAndPush
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+        addToPath: true
+
+    - script: |
+        echo $(GCP_SA_KEY) > $(Build.SourcesDirectory)/gcp-key.json
+      displayName: 'Save GCP Service Account Key'
+
+    - script: |
+        gcloud auth activate-service-account --key-file=$(Build.SourcesDirectory)/gcp-key.json
+        gcloud config set project $(GCP_PROJECT_ID)
+      displayName: 'Authenticate to GCP'
+
+    - script: |
+        gcloud auth configure-docker $(GCP_ARTIFACT_REGISTRY)
+      displayName: 'Configure Docker for GCP Artifact Registry'
+
+    - script: |
+        docker build -t $(GCP_ARTIFACT_REGISTRY)/$(GCP_PROJECT_ID)/$(IMAGE_NAME):0.0.1 .
+        docker push $(GCP_ARTIFACT_REGISTRY)/$(GCP_PROJECT_ID)/$(IMAGE_NAME):0.0.1
+      displayName: 'Build and Push Docker Image'
