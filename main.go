@@ -17,7 +17,7 @@ var db *sql.DB
 
 func main() {
 	var err error
-	dsn := "test:test@tcp(127.0.0.1:3306)/pretest"
+	dsn := "test:test@tcp(mariadb-service.mariadb.svc.cluster.local:3306)/pretest"
 	db, err = sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
